@@ -1,0 +1,19 @@
+# Virtual environment
+venv/
+
+# IDE configurations
+.vscode/
+.idea/
+
+# Python bytecode files
+*.pyc
+__pycache__/
+
+# Heroku files (optional)
+.heroku/
+
+# Vercel files (optional)
+.vercel/
+
+# Other temporary files
+.DS_Store

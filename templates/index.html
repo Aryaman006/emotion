@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Emotion Detection</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        function toggleDetection(action) {
+            fetch('/toggle_emotion_detection', { method: 'POST' })
+                .then(response => {
+                    if (action === 'stop') {
+                        document.getElementById('startBtn').disabled = false;
+                        document.getElementById('stopBtn').disabled = true;
+                    } else {
+                        document.getElementById('startBtn').disabled = true;
+                        document.getElementById('stopBtn').disabled = false;
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function shutdown() {
+            fetch('/shutdown', { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</head>
+<body>
+    <div class="container text-center mt-5">
+        <h1 class="animated slideInDown">Emotion Detection</h1>
+        <img src="{{ url_for('video_feed') }}" class="img-fluid mt-3 mb-3" width="640" height="480">
+        <div class="button-container">
+            <button id="startBtn" class="btn btn-success mr-2" onclick="toggleDetection('start')">Start Detecting</button>
+            <button id="stopBtn" class="btn btn-danger mr-2" onclick="toggleDetection('stop')" disabled>Stop Detecting</button>
+            <button class="btn btn-secondary" onclick="shutdown()">Close Application</button>
+        </div>
+    </div>
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
