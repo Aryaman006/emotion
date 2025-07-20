@@ -12,7 +12,7 @@
 </head>
 <body>
     <div class="container text-center mt-5">
-        <h1>Emotion Detection with Song Suggestion</h1>
+        <h1>Emotion Detection</h1>
         <img src="{{ url_for('video_feed') }}" class="img-fluid mt-3 mb-3" width="640" height="480">
 
         <div class="button-container">
@@ -25,6 +25,11 @@
             <h4>🎵 Suggested Song:</h4>
             <p id="song-text">Loading...</p>
             <a id="spotify-link" href="#" target="_blank" class="btn btn-sm btn-success">Listen on Spotify</a>
+        </div>
+
+        <div id="emotion-message" class="mt-4">
+            <h4>🧠 Emotion Response:</h4>
+            <p id="emotion-text">Loading...</p>
         </div>
     </div>
 
@@ -55,7 +60,20 @@
                 .catch(err => console.error("Error fetching song:", err));
         }
 
-        setInterval(fetchSongSuggestion, 3000);
+        function fetchEmotionMessage() {
+            fetch('/emotion_response')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('emotion-text').innerText =
+                        `${data.message} (Detected: ${data.emotion})`;
+                })
+                .catch(err => console.error("Error fetching emotion response:", err));
+        }
+
+        setInterval(() => {
+            fetchSongSuggestion();
+            fetchEmotionMessage();
+        }, 3000);
     </script>
 </body>
 </html>

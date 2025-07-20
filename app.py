@@ -11,19 +11,31 @@ SPOTIFY_CLIENT_SECRET = 'your-client-secret'  # 🔁 Replace with your actual Cl
 
 app = Flask(__name__)
 
-# Load the pre-trained face detector
+# Load face detector
 faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # Shared state
 video_capture = None
 emotion_detection_active = threading.Event()
 
-# Current detected emotion and suggested song
+# Emotion to message mapping
+emotion_messages = {
+    "happy": "You look happy! Keep smiling 😊",
+    "sad": "You seem a bit down. Want to talk about it?",
+    "angry": "Take a deep breath. Everything's going to be okay.",
+    "surprise": "You look surprised! What happened?",
+    "fear": "Don’t worry, you’re safe here.",
+    "disgust": "Something bothering you?",
+    "neutral": "You seem calm and composed.",
+}
+
+# Current emotion data
 current_song = {
     "emotion": "neutral",
     "song": "Let Her Go",
     "artist": "Passenger",
-    "url": "https://open.spotify.com/track/3ZFTkvIE7kyPt6Nu3PEa7V"
+    "url": "https://open.spotify.com/track/3ZFTkvIE7kyPt6Nu3PEa7V",
+    "message": "You seem calm and composed."
 }
 
 
@@ -98,13 +110,16 @@ def generate_frames():
             if emotion and emotion != current_song.get('emotion'):
                 current_song['emotion'] = emotion
                 current_song.update(get_song_from_spotify(emotion))
+                current_song['message'] = emotion_messages.get(emotion, "How are you feeling?")
 
+            # Draw emotion and message
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = faceCascade.detectMultiScale(gray, 1.1, 4)
             for (x, y, w, h) in faces:
-                cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 cv2.putText(frame, emotion, (x, y - 10), font, 0.9, (0, 0, 255), 2, cv2.LINE_AA)
+                cv2.putText(frame, current_song['message'], (x, y + h + 20), font, 0.7, (255, 255, 0), 2, cv2.LINE_AA)
 
         ret, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
@@ -157,6 +172,14 @@ def shutdown():
 @app.route('/current_song')
 def get_current_song():
     return jsonify(current_song)
+
+
+@app.route('/emotion_response')
+def emotion_response():
+    return jsonify({
+        "emotion": current_song["emotion"],
+        "message": current_song["message"]
+    })
 
 
 if __name__ == '__main__':
